@@ -4,7 +4,7 @@
 This repository contains a collection of scripts designed to facilitate server management tasks. These scripts automate common administrative operations to enhance efficiency and accuracy.
 
 ## Precautions
-Before running any scripts on your server, please ensure you understand their effects and implications. It is recommended to test the scripts in a safe environment before deploying them in a production setting.
+**Before running any scripts on your server, please ensure you understand their effects and implications. It is recommended to test the scripts in a safe environment before deploying them in a production setting.**
 
 ## Getting Started
 
@@ -17,7 +17,7 @@ Sufficient privileges to execute scripts
 Clone the repository to your local machine or server:
 
 ```bash
-git clone https://example.com/server-management-scripts.git
+git clone https://github.com/huangwei0102/server_management_scripts.git
 ```
 
 ### Usage

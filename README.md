@@ -9,8 +9,9 @@ This repository contains a collection of scripts designed to facilitate server m
 ## Getting Started
 
 ### Requirements
-Linux server with Bash shell
-Sufficient privileges to execute scripts
+
+1. Linux server with Bash shell
+2. `sudo` privileges
 
 ### Installation
 

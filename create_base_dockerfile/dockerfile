@@ -1,0 +1,66 @@
+FROM nvidia/cuda:12.3.0-devel-ubuntu20.04
+
+LABEL maintainer="Huangwei <huangwei21b@ict.ac.cn>"
+
+# Set up mirrors for apt
+RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list && apt-get clean 
+
+ENV NVIDIA_VISIBLE_DEVICES=all NVIDIA_DRIVER_CAPABILITIES=compute,utility\
+    LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+# Remove all third-party apt sources to avoid issues with expiring keys.
+RUN rm -f /etc/apt/sources.list.d/*.list && rm -rf /var/lib/apt/lists/*
+
+# Enable terminal colors
+ENV TERM=xterm-256color
+
+# restore a full version of Ubuntu
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    bash -c 'yes | unminimize'
+
+# Install some basic utilities
+RUN apt-get update && apt-get upgrade -y --fix-missing  \
+    && apt-get -y --no-install-recommends \
+    install \
+    ca-certificates \
+    libjpeg-dev \
+    libpng-dev\
+    sudo \
+    git \
+    vim \
+    zsh \
+    tmux \
+    ranger \
+    xsel \
+    mediainfo \
+    proxychains4 \
+    feh \
+    apt-transport-https \
+    traceroute \ 
+    inetutils-ping \
+    net-tools \
+    curl \
+    fontconfig\
+    libgl1 libglib2.0-dev libfontconfig libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0  \
+    libxcb-shape0 libxcb-xfixes0 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libfontconfig1 libdbus-1-3 libx11-6 \
+    openssh-server \ 
+    htop \ 
+    python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set up X11 forwarding (Set X11Forwarding to yes and X11UseLocalhost to no in /etc/ssh/sshd_config)
+RUN sed -i "s/^.*X11Forwarding.*$/X11Forwarding yes/" /etc/ssh/sshd_config && \
+    sed -i "s/^.*X11UseLocalhost.*$/X11UseLocalhost no/" /etc/ssh/sshd_config
+
+# Configure SSH in /etc/ssh/sshd_config
+RUN sed -i 's/^#Port 22/Port 22/' /etc/ssh/sshd_config && \
+    sed -i 's/^#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/^#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config 
+
+EXPOSE 22
+
+ENTRYPOINT ["/usr/bin/env"]
+
+CMD ["bash"]
+
+

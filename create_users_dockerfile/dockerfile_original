@@ -1,0 +1,44 @@
+FROM base_lab_image:1.0
+
+LABEL maintainer="Huangwei <huangwei21b@ict.ac.cn>"
+
+# Create User
+ENV USERNAME="server"
+ENV PASSWD="123456"
+
+RUN useradd --create-home --no-log-init --shell /bin/bash ${USERNAME} && \
+    adduser ${USERNAME} sudo && \
+    echo "${USERNAME}:${PASSWD}" | chpasswd
+
+USER ${USERNAME}:${USERNAME}
+
+WORKDIR /home/${USERNAME}
+
+RUN mkdir /home/${USERNAME}/workspace
+
+VOLUME /home/${USERNAME}/workspace
+
+# Download and install Anaconda
+COPY --chown=${USERNAME}:${USERNAME} Anaconda3-2023.09-0-Linux-x86_64.sh /home/${USERNAME}/anaconda.sh
+
+RUN chmod +x /home/${USERNAME}/anaconda.sh && \
+    /bin/bash /home/${USERNAME}/anaconda.sh -b -p /home/${USERNAME}/anaconda && \
+    rm /home/${USERNAME}/anaconda.sh
+
+# Set up conda
+ENV PATH /home/${USERNAME}/anaconda/bin:$PATH
+RUN echo ". /home/${USERNAME}/anaconda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate" >> ~/.bashrc
+
+RUN /home/${USERNAME}/anaconda/bin/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ && \
+    /home/${USERNAME}/anaconda/bin/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ && \
+    /home/${USERNAME}/anaconda/bin/conda config --set show_channel_urls yes && \
+    /home/${USERNAME}/anaconda/bin/pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+EXPOSE 22
+
+ENTRYPOINT ["/usr/bin/env"]
+
+CMD echo ${PASSWD} | sudo -S service ssh start && /bin/bash
+
+

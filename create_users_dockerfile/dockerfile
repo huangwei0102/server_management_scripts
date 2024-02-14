@@ -1,0 +1,79 @@
+# Multi-stage build
+
+# Stage 1: Install Anaconda
+FROM base_lab_image:v1.0 as installer
+
+ARG USERNAME
+ARG PASSWD
+ARG UID
+ARG GID
+
+# Set environment variables
+ENV USERNAME=${USERNAME} \
+    PASSWD=${PASSWD} \
+    UID=${UID} \
+    GID=${GID}
+
+# Create user with specified UID and GID
+RUN groupadd -g ${GID} ${USERNAME} && \
+    useradd -m -s /bin/bash -u ${UID} -g ${GID} ${USERNAME} && \
+    usermod -aG sudo ${USERNAME} && \
+    echo "${USERNAME}:${PASSWD}" | chpasswd
+
+# Set working directory
+WORKDIR /tmp/install
+
+# Copy anaconda installation script
+COPY Anaconda3-2023.09-0-Linux-x86_64.sh /tmp/install/anaconda.sh
+
+# Install Anaconda
+RUN chmod +x /tmp/install/anaconda.sh && \
+    ./anaconda.sh -b -p /home/${USERNAME}/anaconda
+
+# Stage 2: Build the final image
+FROM base_lab_image:v1.0
+
+LABEL maintainer="Huangwei <huangwei21b@ict.ac.cn>"
+
+ARG USERNAME
+ARG PASSWD
+ARG UID
+ARG GID
+
+# Set environment variables
+ENV USERNAME=${USERNAME} \
+    PASSWD=${PASSWD} \
+    UID=${UID} \
+    GID=${GID}
+
+# Create user with specified UID and GID
+RUN groupadd -g ${GID} ${USERNAME} && \
+    useradd -m -s /bin/bash -u ${UID} -g ${GID} ${USERNAME} && \
+    usermod -aG sudo ${USERNAME} && \
+    echo "${USERNAME}:${PASSWD}" | chpasswd
+
+RUN echo "${USERNAME} ALL=(ALL) ALL" > /etc/sudoers.d/${USERNAME} && chmod 0440 /etc/sudoers.d/${USERNAME}
+
+USER ${USERNAME}:${USERNAME}
+
+# Copy Anaconda installation directory
+COPY --from=installer /home/${USERNAME}/anaconda /home/${USERNAME}/anaconda
+
+# Set working directory
+WORKDIR /home/${USERNAME}/workspace
+
+VOLUME /home/${USERNAME}/workspace
+
+# Configure Conda and Pip
+RUN echo ". /home/${USERNAME}/anaconda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate" >> ~/.bashrc && \
+    /home/${USERNAME}/anaconda/bin/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ && \
+    /home/${USERNAME}/anaconda/bin/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ && \
+    /home/${USERNAME}/anaconda/bin/conda config --set show_channel_urls yes && \
+    /home/${USERNAME}/anaconda/bin/pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+EXPOSE 22
+
+ENTRYPOINT ["/usr/bin/env"]
+
+CMD echo ${PASSWD} | sudo -S service ssh start && /bin/bash

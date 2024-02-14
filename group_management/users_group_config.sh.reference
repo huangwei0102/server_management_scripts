@@ -1,0 +1,9 @@
+# Define group name
+GROUP_NAME="group_name"
+
+# Define array for usernames
+USERNAMES=(
+    "username1"
+    "username2"
+    # More usernames can be added
+)

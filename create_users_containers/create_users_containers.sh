@@ -33,7 +33,7 @@ while IFS= read -r user; do
     container_name="server${container_suffix}"
     
     echo "Creating a Docker container for user $user, port number $port..."
-    docker run --name "$user" --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 -p "$port":22 -t -d -h "$container_name" -v "/data/users/$user/workspace:/home/$user/workspace" "${user}_lab_image:v1.0"
+    docker run --name "$user" --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 -p "$port":22 -t -d -h "$container_name" -v "/data/users/$user/workspace:/home/$user/workspace" "${user}_lab_image:v1.2"
 done < "$users_list"
 
 echo "Docker containers for all users have been created or were already present."

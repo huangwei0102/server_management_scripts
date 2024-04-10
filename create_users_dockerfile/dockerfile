@@ -74,6 +74,10 @@ RUN echo ". /home/${USERNAME}/anaconda/etc/profile.d/conda.sh" >> ~/.bashrc && \
 
 EXPOSE 22
 
-ENTRYPOINT ["/usr/bin/env"]
+RUN echo '#!/bin/bash' > /usr/local/bin/start.sh \
+    && echo '/usr/sbin/sshd -D &' >> /usr/local/bin/start.sh \
+    && echo '/bin/bash' >> /usr/local/bin/start.sh \
+    && chmod +x /usr/local/bin/start.sh
 
-CMD ["/bin/bash"]
+CMD ["/usr/local/bin/start.sh"]
+

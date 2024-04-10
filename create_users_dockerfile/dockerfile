@@ -1,7 +1,7 @@
 # Multi-stage build
 
 # Stage 1: Install Anaconda
-FROM base_lab_image:v1.0 as installer
+FROM base_lab_image:v1.2 as installer
 
 ARG USERNAME
 ARG PASSWD
@@ -31,7 +31,7 @@ RUN chmod +x /tmp/install/anaconda.sh && \
     ./anaconda.sh -b -p /home/${USERNAME}/anaconda
 
 # Stage 2: Build the final image
-FROM base_lab_image:v1.0
+FROM base_lab_image:v1.2
 
 LABEL maintainer="Huangwei <huangwei21b@ict.ac.cn>"
 

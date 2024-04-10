@@ -11,7 +11,7 @@ fi
 while IFS=: read -r USERNAME PASSWD
 do
     # Define the image name
-    IMAGE_NAME="${USERNAME}_lab_image:v1.0"
+    IMAGE_NAME="${USERNAME}_lab_image:v1.2"
 
     # Check if the Docker image already exists
     if docker image inspect $IMAGE_NAME > /dev/null 2>&1; then

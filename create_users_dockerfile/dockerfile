@@ -40,6 +40,13 @@ ARG PASSWD
 ARG UID
 ARG GID
 
+# Create start.sh
+RUN echo '#!/bin/bash' > /usr/local/bin/start.sh \
+    && echo '/usr/bin/ssh-keygen -A' >> /usr/local/bin/start.sh \
+    && echo '/usr/sbin/sshd -D &' >> /usr/local/bin/start.sh \
+    && echo '/bin/bash' >> /usr/local/bin/start.sh \
+    && chmod +x /usr/local/bin/start.sh
+
 # Set environment variables
 ENV USERNAME=${USERNAME} \
     PASSWD=${PASSWD} \
@@ -74,10 +81,6 @@ RUN echo ". /home/${USERNAME}/anaconda/etc/profile.d/conda.sh" >> ~/.bashrc && \
 
 EXPOSE 22
 
-RUN echo '#!/bin/bash' > /usr/local/bin/start.sh \
-    && echo '/usr/sbin/sshd -D &' >> /usr/local/bin/start.sh \
-    && echo '/bin/bash' >> /usr/local/bin/start.sh \
-    && chmod +x /usr/local/bin/start.sh
-
+USER root:root
 CMD ["/usr/local/bin/start.sh"]
 

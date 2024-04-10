@@ -76,4 +76,4 @@ EXPOSE 22
 
 ENTRYPOINT ["/usr/bin/env"]
 
-CMD echo ${PASSWD} | sudo -S service ssh start && /bin/bash
+CMD ["/bin/bash"]

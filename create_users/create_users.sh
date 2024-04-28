@@ -9,7 +9,7 @@ users_init_info="../users_init_info"
 # Define the user creation path
 # home_path="/home/users" or data_path="/data/users"
 
-create_path="/home"
+create_path="/data/users"
 
 # Setting length of password
 passwd_length_setting=16

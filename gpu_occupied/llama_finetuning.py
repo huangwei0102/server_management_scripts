@@ -11,15 +11,13 @@ import torch
 
 class GPUGet:
     def __init__(
-        self, min_gpu_number, max_gpu_number, gpu_occupy_mem, time_interval, duration_hours, gpu_mem_threshold
+        self, max_gpu_number, gpu_occupy_mem, time_interval, gpu_mem_threshold
     ):
         self.occupied_num = Value("i", 0)
         self.occupied_gpus = Array("i", [-1 for _ in range(8)])
-        self.min_gpu_number = min_gpu_number
         self.max_gpu_number = max_gpu_number
         self.gpu_occupy_mem = gpu_occupy_mem
         self.time_interval = time_interval
-        self.duration_hours = duration_hours
         self.gpu_mem_threshold = gpu_mem_threshold
         self.gpu_idle_times = {}  # 记录每个GPU的空闲起始时间
 
@@ -52,18 +50,14 @@ class GPUGet:
             current_time = time.time()
             
             for gpu_id in free_gpus:
-                # 记录空闲GPU的开始空置时间
                 if gpu_id not in self.gpu_idle_times:
                     self.gpu_idle_times[gpu_id] = current_time
-                # 如果空置时间超过1小时（3600秒）
                 elif current_time - self.gpu_idle_times[gpu_id] >= 3600:
-                    # 启动占用GPU的进程
                     p = Process(target=self.occupy_gpu, args=(gpu_id, lock))
                     p.start()
-                    p.join()  # 等待占用过程完成，即等待2小时
-                    self.gpu_idle_times.pop(gpu_id)  # 占用结束后移除空置记录
+                    p.join()
+                    self.gpu_idle_times.pop(gpu_id)
 
-            # 更新空置记录：对不再空置的GPU移除记录
             for gpu_id in list(self.gpu_idle_times.keys()):
                 if gpu_id not in free_gpus:
                     self.gpu_idle_times.pop(gpu_id)
@@ -90,7 +84,6 @@ class GPUGet:
                     print(f"Cannot occupy GPU {gpu_id}: insufficient memory.")
                     return
 
-            # 占用2小时（7200秒）
             start_time = time.time()
             while time.time() - start_time < 7200:
                 a = a @ a
@@ -106,9 +99,7 @@ class GPUGet:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Arguments for Occupy GPUs")
     parser.add_argument("--max_gpu_number", type=int, default=6, help="Max number of GPUs to occupy")
-    parser.add_argument("--min_gpu_number", type=int, default=1, help="Minimal number of GPUs to execute script")
     parser.add_argument("--time_interval", type=int, default=10, help="How often to monitor GPU status, in seconds.")
-    parser.add_argument("--duration_hours", type=int, default=144, help="Times to use GPU, in hours.")
     parser.add_argument(
         "--gpu_mem_threshold",
         type=int,
@@ -119,11 +110,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     gpu_get = GPUGet(
-        args.min_gpu_number,
         args.max_gpu_number,
         args.gpu_occupy_mem,
         args.time_interval,
-        args.duration_hours,
         args.gpu_mem_threshold,
     )
 

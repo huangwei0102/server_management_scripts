@@ -17,21 +17,24 @@ int main(int argc, char *argv[]) {
     char proc_path[256];
     snprintf(proc_path, sizeof(proc_path), "/proc/%d", pid);
 
+    // 设置目标用户名
+    const char *targetuser = "targetuser";  // 将 "targetuser" 替换为目标用户名
+
     // 检查目标进程是否存在
     if (stat(proc_path, &statbuf) == -1) {
         perror("Error: Process does not exist");
         return 1;
     }
 
-    // 检查进程的所有者是否是特定用户，例如 "targetuser"
-    struct passwd *pwd = getpwnam("targetuser");  // 将 "targetuser" 替换为目标用户名
+    // 检查进程的所有者是否是特定用户
+    struct passwd *pwd = getpwnam(targetuser);
     if (!pwd) {
-        fprintf(stderr, "Error: User 'targetuser' not found\n");
+        fprintf(stderr, "Error: User '%s' not found\n", targetuser);
         return 1;
     }
 
     if (statbuf.st_uid != pwd->pw_uid) {
-        fprintf(stderr, "Error: Process does not belong to target user 'targetuser'\n");
+        fprintf(stderr, "Error: Process does not belong to target user '%s'\n", targetuser);
         return 1;
     }
 
@@ -41,6 +44,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    printf("Process %d owned by 'targetuser' killed successfully.\n", pid);
+    printf("Process %d owned by '%s' killed successfully.\n", pid, targetuser);
     return 0;
 }
